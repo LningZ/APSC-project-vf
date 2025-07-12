@@ -1,83 +1,143 @@
-L*_sha: L*-Based Algorithm for Stochastic Hybrid Automata Learning 
-====================================
+# L\*_SHA Variants for Thermostat Case Study
 
-This repository contains the implementation of L*_sha, an algorithm to learn Stochastic Hybrid Automata from collected system traces.
-The algorithm is not tied to a specific domain, although it has been successfully exploited
-to infer a model of human behavior in human-robot interaction scenarios building upon the work presented in:
-- [*Formal Modeling and Verification of Multi-Robot Interactive Scenarios in Service Settings*][paper5]
-- [*A Deployment Framework for Formally Verified Human-Robot Interactions*][paper4]
-- [*A Model-driven Approach for the Formal Analysis of Human-Robot Interaction Scenarios*][paper3]
-- [*Formal Verification of Human-Robot Interaction in Healthcare Scenarios*][paper2]
-- [*Statistical Model Checking of Human-Robot Interaction Scenarios*][paper1]
+This repository hosts three branches of the L\*_SHA algorithm, each representing a different variant of the learning approach, adapted for Uppaal compatibility and parallel performance testing.
 
-The algorithm builds upon [L\*][angluin], whose main elements are:
-- a [Teacher](sha_learning/learning_setup/teacher.py) that stores the collected traces and answers queries based on currently accumulated knowledge 
-- a [Learner](sha_learning/learning_setup/learner.py) that progressively refines the hypothesis automaton by asking queries to the Teacher
+## Branches Overview
 
-The teacher relies on **samples** of the System Under Learning (SUL) (i.e., it does not possess exact knowledge).
-To generate traces for the specific use case of human-robot interaction, we exploit either [Uppaal][uppaal] with manually drafted SHA to be learned or the [deployment framework][dep] to simulate the robotic application in a virtual environment and collect the simulation traces.
+### `lsha_ov` — Original Serial Version
+- This is the original version using **serial trace generation** and **random seeds**.
+- Compatible only with **Uppaal v4**.
+- This version may not run properly on macOS with Apple Silicon chips.
 
-Authors:
+### `lsha_non_parrall` — Modified Serial Version for Uppaal 5
+- Adapted for **Uppaal v5** because macOS (M1/M2/Pro/Max chips) does not support Uppaal 4.
+- Code structure is updated to match Uppaal 5’s format.
+- Uses **fixed seed** for trace generation to enable performance comparison with the parallel version.
+- Logic is still **serial**, no concurrency.
 
-| Name              | E-mail address           |
-|:----------------- |:-------------------------|
-| Lestingi Livia    | livia.lestingi@polimi.it |
+### `lsha_parall` — Parallel Version
+- Parallel trace generation and processing.
+- Uses **fixed seed** for reproducibility.
+- Fully adapted to **Uppaal v5** format.
+- Recommended as the **main branch** for performance evaluation.
 
-Learned SHA
------------
-
-Learned SHA for the **thermostat** case study can be found [here](resources/learned_ha/thermostat_cs).
-
-Learned SHA for the **human-robot interaction** case study can be found [here](resources/learned_ha/hri_cs).
-
-Configuration File Setup
------------
-
-The [main L\*_sha script](sha_learning/learn_model.py) requires as input parameter the path to a configuration file, whose template can be found within the [`./resources/config/`](sha_learning/resources/config) folder.
-
-Make sure to set each property to match your environment, specifically: 
-- **N_min** is the minimum number of observations for each trace to stop perfoming the refinement query (i.e., a value greater than 10 is advised);
-- **CASE_STUDY** is the chosen SUL (either THERMO or HRI);
-- **CS_VERSION** is the experiment you want to perform for the chosen SUL;
-- **RESAMPLE_STRATEGY** is the chosen approach to generate new SUL traces (either UPPAAL or SIM).
-
-If the chosen resample strategy is UPPAAL:
-- **UPPAAL_PATH** is the path to Uppaal [command line utility][verifyta];
-- **UPPAAL_SCRIPT_PATH** is the path to [*verify.sh*](resources/scripts);
-- **UPPAAL_MODEL_PATH** is the path to the Uppaal model template (e.g., [*hri-w_ref.xml*](resources/uppaal_resources/hri-w_ref.xml)); 
-- **UPPAAL_QUERY_PATH** is the path to the Uppal query template (e.g., [*thermostat.q*](resources/uppaal_resources/thermostat.q));
-- **UPPAAL_OUT_PATH** is the path where you want the generated traces to be stored.
-
-If the chosen resample strategy is SIM:
-- **SIM_LOGS_PATH** is the path to available SUL traces.
-
-**Note**: The algorithm has been tested on Uppaal **v.4.1.24** on Mac OS X. Should you run into any issue while testing with a different configuration please report to livia.lestingi@polimi.it.
-
-Python Dependencies
------------
-
-Install the required dependencies:
-
-	pip install -r $LSHA_REPO_PATH/requirements.txt
-
-Add the L\*\_SHA repo path to your Pytho path (fixes ModuleNotFoundError while trying to execute from command line):
-
-	export PYTHONPATH="${PYTHONPATH}:$LSHA_REPO_PATH"
-
-Run the main script specifying the path to your configuration file:
-
-	python3 $LSHA_REPO_PATH/it/polimi/hri_learn/learn_model.py $CONFIG_FILE_PATH
-	
 ---
 
-*Copyright &copy; 2021 Livia Lestingi*
+## How to Run
 
-[paper1]: https://doi.org/10.4204/EPTCS.319.2
-[paper2]: https://doi.org/10.1007/978-3-030-58768-0_17
-[paper3]: https://doi.org/10.1109/SMC42975.2020.9283204
-[paper4]: https://doi.org/10.1109/ACCESS.2021.3117852
-[paper5]: https://ieeexplore.ieee.org/abstract/document/9796464 
-[angluin]: https://doi.org/10.1016/0890-5401(87)90052-6
-[uppaal]: https://uppaal.org/
-[dep]: https://github.com/LesLivia/hri_deployment
-[verifyta]: https://docs.uppaal.org/toolsandapi/verifyta/
+### 1. Install Uppaal v5
+Download Uppaal v5 from the official website:  
+https://uppaal.org/downloads/  
+(Required because Uppaal v4 is incompatible with Apple Silicon machines.)
+
+---
+
+### 2. Modify `config.ini` with local paths
+
+Edit the file:
+
+```
+sha_learning/resources/config.ini
+```
+
+Change the following paths to match your local system:
+
+```ini
+[TRACE GENERATION]
+UPPAAL_PATH = /Applications/Dev/uppaal-bin/bin
+UPPAAL_SCRIPT_PATH = /Users/yourname/.../verify.sh
+UPPAAL_MODEL_PATH = /Users/yourname/.../thermostat.xml
+UPPAAL_QUERY_PATH = /Users/yourname/.../thermostat.q
+UPPAAL_OUT_PATH = /Users/yourname/.../upp_results/{}.txt
+```
+
+---
+
+### 3. Run the code from terminal
+
+```bash
+python3 -m sha_learning.learn_model config.ini
+```
+
+If you encounter errors, try:
+
+```bash
+python3 -m sha_learning.learn_model config.ini ROOM1 2012-12-01 2013-01-01
+```
+
+- `ROOM1` can be replaced with `ROOM1` to `ROOM6`, depending on the test case.
+
+---
+
+## How to Compare Serial vs. Parallel Versions
+
+### For successful convergence and learned models:
+1. Switch to `lsha_non_parrall` and `lsha_parall` branches.
+2. In each branch, edit `config.ini` to:
+   - Set `CS_VERSION = 1`
+   - Try values for `N_min = 20, 50, 100, 150, 200, 300`
+3. Run both versions.
+4. Compare output `.txt` files located at:
+
+```
+resources/learned_sha/THERMO_OPPAAL_1.txt
+```
+
+You can compare:
+- `--OBSERVABLE EVENTS--`
+- `--LEARNED DISTRIBUTIONS--`
+- `--FINAL OBSERVATION TABLE--`
+- `--PERFORMANCE DATA--`
+
+Only the **execution time** should differ — everything else should match.
+
+---
+
+### ⚠️ For non-converging cases with timing focus:
+- Try `CS_VERSION = 2, 3, ..., 6`
+- Keep testing with increasing `N_min = 20 → 300`
+- Even if `.txt` files are not generated (due to non-convergence), observe **training time directly in terminal** logs.
+- This still reflects performance gain from parallelization (e.g., fewer seconds for same number of iterations).
+
+---
+
+### Modify Seed to Compare Effects
+
+In both branches, open:
+
+```ini
+[GENERAL]
+INITIAL_SEED = 1000
+```
+
+Change the seed to a different value **in both config files** to ensure consistent trace generation.
+
+To **restore random seed mode**, open:
+
+```python
+sha_learning/learning_setup/trace_gen.py
+```
+
+And replace `get_traces_uppaal()` with the commented random-seed version provided in the file.
+
+---
+
+## Testing Other Case Studies (like HRI)
+
+- The **HRI case** cannot be run on your Mac with Uppaal 5, because the HRI XML model is not compatible.
+- If you want to test HRI:
+  - Use **Uppaal 4**
+  - Set in `config.ini`:
+    ```ini
+    CASE_STUDY = HRI
+    UPPAAL_MODEL_PATH = .../hri-w_ref.xml
+    UPPAAL_QUERY_PATH = .../hri-w_ref1.q
+    ```
+  - Note: may still encounter version format issues.
+
+---
+
+## Author
+This repository was adapted and tested on **macOS (M1 Pro)** by **Luning Zhu**.
+
+Original method by **Livia Lestingi**, Politecnico di Milano.

@@ -140,4 +140,6 @@ And replace `get_traces_uppaal()` with the commented random-seed version provide
 ## Author
 This repository was adapted and tested on **macOS (M1 Pro)** by **Luning Zhu**.
 
-Original method by **Livia Lestingi**, Politecnico di Milano.
+This implementation is based on the original method developed by Livia Lestingi (Politecnico di Milano).
+
+The source code is available at github.com/LesLivia/lsha, and is reused in my customized branch lsha_vo.

@@ -30,6 +30,7 @@ This repository hosts three branches of the L\*_SHA algorithm, each representing
 ```bash
 pip install -r requirements.txt
 export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+```
 
 
 ### 1. Install Uppaal v5

@@ -9,7 +9,7 @@ This repository hosts three branches of the L\*_SHA algorithm, each representing
 - Compatible only with **Uppaal v4**.
 - This version may not run properly on macOS with Apple Silicon chips.
 
-### `lsha_non_parrall` — Modified Serial Version for Uppaal 5
+### `lsha_non_parall` — Modified Serial Version for Uppaal 5
 - Adapted for **Uppaal v5** because macOS (M1/M2/Pro/Max chips) does not support Uppaal 4.
 - Code structure is updated to match Uppaal 5’s format.
 - Uses **fixed seed** for trace generation to enable performance comparison with the parallel version.
@@ -24,6 +24,13 @@ This repository hosts three branches of the L\*_SHA algorithm, each representing
 ---
 
 ## How to Run
+
+### 0. Install dependencies
+
+```bash
+pip install -r requirements.txt
+export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+
 
 ### 1. Install Uppaal v5
 Download Uppaal v5 from the official website:  
@@ -40,7 +47,7 @@ Edit the file:
 sha_learning/resources/config.ini
 ```
 
-Change the following paths to match your local system:
+Set the following absolute paths to match your machine:
 
 ```ini
 [TRACE GENERATION]
@@ -50,6 +57,21 @@ UPPAAL_MODEL_PATH = /Users/yourname/.../thermostat.xml
 UPPAAL_QUERY_PATH = /Users/yourname/.../thermostat.q
 UPPAAL_OUT_PATH = /Users/yourname/.../upp_results/{}.txt
 ```
+
+---
+
+### 2b. Configure learning options
+
+In `config.ini`, the following parameters control learning behavior:
+
+```ini
+[GENERAL]
+CASE_STUDY = THERMO             ; Use "THERMO" for thermostat case
+CS_VERSION = 1                  ; Use values from 1 to 6 (ROOM1 to ROOM6)
+N_min = 100                     ; Min. number of samples before confirming a row entry
+INITIAL_SEED = 1000             ; Fixed seed for deterministic trace generation
+RESAMPLE_STRATEGY = UPPAAL     ; Use "UPPAAL" (default) or "SIM"
+
 
 ---
 
@@ -72,7 +94,7 @@ python3 -m sha_learning.learn_model config.ini ROOM1 2012-12-01 2013-01-01
 ## How to Compare Serial vs. Parallel Versions
 
 ### For successful convergence and learned models:
-1. Switch to `lsha_non_parrall` and `lsha_parall` branches.
+1. Switch to `lsha_non_parall` and `lsha_parall` branches.
 2. In each branch, edit `config.ini` to:
    - Set `CS_VERSION = 1`
    - Try values for `N_min = 20, 50, 100, 150, 200, 300`
@@ -80,7 +102,7 @@ python3 -m sha_learning.learn_model config.ini ROOM1 2012-12-01 2013-01-01
 4. Compare output `.txt` files located at:
 
 ```
-resources/learned_sha/THERMO_OPPAAL_1.txt
+resources/learned_sha/THERMO_UPPAAL_1.txt
 ```
 
 You can compare:
@@ -89,7 +111,7 @@ You can compare:
 - `--FINAL OBSERVATION TABLE--`
 - `--PERFORMANCE DATA--`
 
-Only the **execution time** should differ — everything else should match.
+All outputs should match, except **execution time** due to parallelism
 
 ---
 

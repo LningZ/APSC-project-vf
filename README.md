@@ -66,14 +66,18 @@ UPPAAL_OUT_PATH = /Users/yourname/.../upp_results/{}.txt
 In `config.ini`, the following parameters control learning behavior:
 
 ```ini
-[GENERAL]
+
 CASE_STUDY = THERMO             ; Use "THERMO" for thermostat case
+
 CS_VERSION = 1                  ; Use values from 1 to 6 (ROOM1 to ROOM6)
+
 N_min = 100                     ; Min. number of samples before confirming a row entry
+
 INITIAL_SEED = 1000             ; Fixed seed for deterministic trace generation
-RESAMPLE_STRATEGY = UPPAAL     ; Use "UPPAAL" (default) or "SIM"
 
+RESAMPLE_STRATEGY = UPPAAL     ; Use "UPPAAL" (default)
 
+```
 ---
 
 ### 3. Run the code from terminal
@@ -165,4 +169,4 @@ This repository was adapted and tested on **macOS (M1 Pro)** by **Luning Zhu**.
 
 This implementation is based on the original method developed by Livia Lestingi (Politecnico di Milano).
 
-The source code is available at github.com/LesLivia/lsha, and is reused in my customized branch lsha_vo.
+The source code is available at [github.com/LesLivia/lsha](https://github.com/LesLivia/lsha), and is reused in my customized branch `lsha_vo`.
